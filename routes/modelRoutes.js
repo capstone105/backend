@@ -1,15 +1,21 @@
-const express = require('express');
-const router = express.Router();
 const { predict } = require('../services/modelService');
 
-router.post('/predict', async (req, res) => {
-  try {
-    const input = req.body.input; // pastikan ini array dengan panjang 80
-    const result = await predict(input);
-    res.json({ prediction: result });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
+const modelRoutes = [
+  {
+    method: 'POST',
+    path: '/predict',
+    options: {
+      handler: async (request, h) => {
+        try {
+          const { input } = request.payload; // Hapi menggunakan request.payload untuk body
+          const result = await predict(input);
+          return h.response({ prediction: result }).code(200);
+        } catch (error) {
+          return h.response({ error: error.message }).code(500);
+        }
+      },
+    },
+  },
+];
 
-module.exports = router;
+module.exports = modelRoutes;
